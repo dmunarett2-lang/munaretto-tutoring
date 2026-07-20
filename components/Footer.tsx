@@ -3,9 +3,7 @@ export default function Footer() {
   return (
     <footer>
       <div className="wrap footer-inner">
-        <div>
-          © {year} Munaretto Tutoring — Dominic Munaretto, University of Notre Dame
-        </div>
+        <div>© {year} Munaretto Tutoring — Dominic Munaretto</div>
         <div>Based in the Chicago area</div>
       </div>
     </footer>

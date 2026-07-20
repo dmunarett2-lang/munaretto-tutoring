@@ -47,6 +47,12 @@ nav{
 .logo span{color:var(--red);}
 .nav-links{display:flex; align-items:center; gap:34px; font-size:0.92rem; font-weight:500;}
 .nav-links a:hover{color:var(--red);}
+.nav-toggle{
+  display:none; background:transparent; border:1px solid var(--hairline); border-radius:2px;
+  width:42px; height:40px; align-items:center; justify-content:center;
+  font-size:1.2rem; line-height:1; color:var(--ink);
+}
+.nav-toggle:hover{border-color:var(--ink);}
 .nav-cta{
   background:var(--ink); color:var(--paper); padding:10px 20px;
   border-radius:2px; font-size:0.88rem; font-weight:600;
@@ -114,6 +120,9 @@ h1.headline em{font-style:italic; font-weight:500; color:var(--red);}
 
 /* margin annotation panel */
 .grade-panel{position:relative; padding:26px;}
+/* on desktop the hero card centers high; nudge it down so the checkmark
+   above it clears the sticky nav */
+@media(min-width:861px){ .grade-panel{ margin-top:44px; } }
 .grade-card{
   background:var(--white); border:1px solid var(--hairline); padding:30px 26px;
   position:relative;
@@ -123,7 +132,7 @@ h1.headline em{font-style:italic; font-weight:500; color:var(--red);}
 .grade-num{font-family:var(--font-fraunces), serif; font-weight:600; font-size:2.1rem;}
 .grade-label{font-size:0.8rem; color:var(--slate);}
 .circle-mark{
-  position:absolute; top:-20px; right:-16px; width:76px; height:76px;
+  position:absolute; top:-44px; right:-10px; width:70px; height:70px;
   border:2.5px solid var(--red); border-radius:50%; color:var(--red);
   display:flex; align-items:center; justify-content:center;
   font-family:var(--font-caveat), cursive; font-weight:700; font-size:1.9rem;
@@ -164,6 +173,9 @@ h2.section-title{font-family:var(--font-fraunces), serif; font-weight:600; font-
   aspect-ratio:4/5; background:var(--paper-2); border:1px solid var(--hairline);
   display:flex; align-items:center; justify-content:center; font-family:var(--font-fraunces), serif;
   color:var(--slate); font-size:0.9rem; text-align:center; padding:20px;
+}
+.about-photo-img{
+  width:100%; height:auto; object-fit:cover; padding:0; display:block;
 }
 .about-copy p{margin-bottom:16px; color:var(--slate); font-size:1rem;}
 .about-copy strong{color:var(--ink);}
@@ -237,6 +249,8 @@ footer{border-top:1px solid var(--hairline); padding:36px 0; font-size:0.82rem; 
 
 /* admin */
 .admin-tables{display:grid; grid-template-columns:1fr; gap:26px;}
+.table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+.table-scroll table{min-width:460px;}
 table{width:100%; border-collapse:collapse; font-size:0.88rem;}
 th{text-align:left; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--slate); padding:10px 8px; border-bottom:1px solid var(--hairline);}
 td{padding:12px 8px; border-bottom:1px solid var(--hairline);}
@@ -259,10 +273,35 @@ tr:last-child td{border-bottom:none;}
 @media(max-width:860px){
   .hero-grid, .about-grid, .contact-grid, .dash-grid{grid-template-columns:1fr;}
   .services-grid, .results-grid, .test-grid{grid-template-columns:1fr 1fr;}
+  .pricing-grid{grid-template-columns:1fr;}
   h1.headline{font-size:2.5rem;}
-  .nav-links{display:none;}
   .add-student-form{grid-template-columns:1fr;}
   .app-header{flex-direction:column; align-items:flex-start; gap:14px;}
+
+  /* mobile nav: hamburger toggles a stacked dropdown panel */
+  .nav-toggle{display:flex;}
+  .nav-links{
+    display:none;
+    position:absolute; top:100%; left:0; right:0;
+    flex-direction:column; align-items:stretch; gap:0;
+    background:var(--paper); border-bottom:1px solid var(--hairline);
+    padding:6px 28px 18px;
+    box-shadow:0 14px 26px rgba(22,35,61,0.08);
+  }
+  .nav-links.mobile-open{display:flex;}
+  .nav-links > a,
+  .nav-links > button.login-btn{
+    padding:14px 0; border-bottom:1px solid var(--hairline); width:100%; text-align:left;
+  }
+  .nav-links .login-wrap{width:100%;}
+  .nav-links .login-wrap > .login-btn{
+    width:100%; padding:14px 0; border:none; border-bottom:1px solid var(--hairline);
+    justify-content:space-between; border-radius:0;
+  }
+  .login-menu{
+    position:static; width:100%; box-shadow:none; border:none; padding:14px 0 4px;
+  }
+  .nav-cta{margin-top:14px; text-align:center;}
 }
 @media(max-width:560px){
   .services-grid, .results-grid, .test-grid{grid-template-columns:1fr;}

@@ -57,26 +57,28 @@ export default async function Admin() {
                 No students yet — accounts created through the sign-up page will appear here.
               </div>
             ) : (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Focus</th>
-                    <th>Email</th>
-                    <th>Next session</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((s) => (
-                    <tr key={s.id}>
-                      <td>{s.name || "—"}</td>
-                      <td>{s.focus || "—"}</td>
-                      <td>{s.email}</td>
-                      <td>{s.next_session || "Not scheduled"}</td>
+              <div className="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Focus</th>
+                      <th>Email</th>
+                      <th>Next session</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {students.map((s) => (
+                      <tr key={s.id}>
+                        <td>{s.name || "—"}</td>
+                        <td>{s.focus || "—"}</td>
+                        <td>{s.email}</td>
+                        <td>{s.next_session || "Not scheduled"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
 
@@ -87,28 +89,30 @@ export default async function Admin() {
                 No consult requests yet — submissions from the home-page contact form show up here.
               </div>
             ) : (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Message</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {inquiries.map((iq) => (
-                    <tr key={iq.id}>
-                      <td>{iq.name}</td>
-                      <td>{iq.email}</td>
-                      <td style={{ maxWidth: "260px" }}>{iq.message}</td>
-                      <td>
-                        <span className="pill new">{iq.status}</span>
-                      </td>
+              <div className="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Message</th>
+                      <th>Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {inquiries.map((iq) => (
+                      <tr key={iq.id}>
+                        <td>{iq.name}</td>
+                        <td>{iq.email}</td>
+                        <td style={{ maxWidth: "260px" }}>{iq.message}</td>
+                        <td>
+                          <span className="pill new">{iq.status}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>

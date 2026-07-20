@@ -2,6 +2,7 @@ import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import ContactForm from "@/components/ContactForm";
+import Headshot from "@/components/Headshot";
 
 export default function Home() {
   return (
@@ -130,11 +131,7 @@ export default function Home() {
       {/* ABOUT */}
       <section id="about">
         <div className="wrap about-grid">
-          <div className="about-photo">
-            Photo of Dominic
-            <br />
-            [add headshot here]
-          </div>
+          <Headshot />
           <div className="about-copy">
             <div className="kicker">About your tutor</div>
             <h2 className="section-title">Hi, I&apos;m Dominic.</h2>

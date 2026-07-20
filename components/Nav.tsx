@@ -11,7 +11,8 @@ export default function Nav() {
   const router = useRouter();
   const wrapRef = useRef<HTMLDivElement>(null);
 
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // desktop login dropdown
+  const [menuOpen, setMenuOpen] = useState(false); // mobile hamburger menu
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [role, setRole] = useState<Role | null>(null);
 
@@ -55,9 +56,15 @@ export default function Nav() {
     return () => document.removeEventListener("click", onDocClick);
   }, []);
 
+  function closeMenus() {
+    setMenuOpen(false);
+    setOpen(false);
+  }
+
   async function logout() {
     const supabase = createClient();
     await supabase.auth.signOut();
+    closeMenus();
     router.push("/");
     router.refresh();
   }
@@ -65,18 +72,39 @@ export default function Nav() {
   return (
     <nav>
       <div className="wrap nav-inner">
-        <Link href="/" className="logo">
+        <Link href="/" className="logo" onClick={closeMenus}>
           Munaretto <span>Tutoring</span>
         </Link>
-        <div className="nav-links">
-          <Link href="/#services">Services</Link>
-          <Link href="/pricing">Pricing</Link>
-          <Link href="/#about">About</Link>
-          <Link href="/#results">Results</Link>
+
+        <button
+          className="nav-toggle"
+          aria-label="Toggle menu"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          {menuOpen ? "✕" : "☰"}
+        </button>
+
+        <div className={`nav-links${menuOpen ? " mobile-open" : ""}`}>
+          <Link href="/#services" onClick={closeMenus}>
+            Services
+          </Link>
+          <Link href="/pricing" onClick={closeMenus}>
+            Pricing
+          </Link>
+          <Link href="/#about" onClick={closeMenus}>
+            About
+          </Link>
+          <Link href="/#results" onClick={closeMenus}>
+            Results
+          </Link>
 
           {signedIn ? (
             <>
-              <Link href={role === "admin" ? "/admin" : "/dashboard"}>
+              <Link
+                href={role === "admin" ? "/admin" : "/dashboard"}
+                onClick={closeMenus}
+              >
                 {role === "admin" ? "Admin" : "My dashboard"}
               </Link>
               <button className="login-btn" onClick={logout}>
@@ -92,12 +120,12 @@ export default function Nav() {
                 Log in <span className="caret">▾</span>
               </button>
               <div className={`login-menu${open ? " show" : ""}`}>
-                <LoginForm onDone={() => setOpen(false)} />
+                <LoginForm onDone={closeMenus} />
               </div>
             </div>
           )}
 
-          <Link href="/#contact" className="nav-cta">
+          <Link href="/#contact" className="nav-cta" onClick={closeMenus}>
             Book a consult
           </Link>
         </div>
