@@ -188,7 +188,7 @@ h2.section-title{font-family:var(--font-fraunces), serif; font-weight:600; font-
 .form-success.show{display:block;}
 
 footer{border-top:1px solid var(--hairline); padding:36px 0; font-size:0.82rem; color:var(--slate);}
-.footer-inner{display:flex; justify-content:space-between; align-items:center;}
+.footer-inner{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px 24px;}
 
 /* ===== PRICING PAGE ===== */
 .pricing-hero{padding:70px 0 20px; border-bottom:1px solid var(--hairline);}
