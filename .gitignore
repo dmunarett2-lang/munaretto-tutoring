@@ -1,0 +1,15 @@
+# dependencies (present once/if we move to a framework)
+node_modules/
+
+# env / secrets — never commit these
+.env
+.env.local
+.env*.local
+
+# vercel
+.vercel/
+
+# os / editor cruft
+.DS_Store
+Thumbs.db
+*.log
