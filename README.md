@@ -1,34 +1,53 @@
 # Munaretto Tutoring
 
-Marketing site for Munaretto Tutoring (ACT prep & college essays) — Dominic Munaretto, University of Notre Dame.
+Marketing site + student/admin portal for Munaretto Tutoring (ACT prep & college essays) — Dominic Munaretto, University of Notre Dame.
 
-Currently a **single-file static site**: everything lives in [`index.html`](index.html) (HTML, CSS, and vanilla JS inline). No build step, no dependencies. Vercel serves it as a static site.
+**Stack:** [Next.js 16](https://nextjs.org) (App Router, TypeScript). Migrated from the original single-file static `index.html` (still in git history) so that real Supabase auth can be added cleanly.
 
-## Local preview
-
-Open `index.html` directly in a browser, or serve the folder with any static server, e.g.:
+## Getting started
 
 ```bash
-python3 -m http.server 8000
-# then visit http://localhost:8000
+npm install
+npm run dev      # http://localhost:3000
+npm run build    # production build
 ```
+
+Node 24 LTS. No environment variables needed yet (they arrive with Supabase).
+
+## Routes
+
+| Route | What it is |
+|-------|------------|
+| `/` | Home — hero, services, results, about, testimonials, contact |
+| `/pricing` | Rates & packages |
+| `/dashboard` | Student dashboard (**placeholder-gated**, demo data) |
+| `/admin` | Admin dashboard (**placeholder-gated**, demo data) |
 
 ## Deploy
 
-Hosted on Vercel as a static site (no framework, no build command). Pushes to `main` auto-deploy.
+Hosted on Vercel. Vercel auto-detects Next.js — no config needed. Pushes to `main` auto-deploy.
 
-## ⚠️ Auth is a front-end demo only — NOT production auth
+## ⚠️ Auth is a placeholder — NOT production auth (yet)
 
-The "Log in" dropdown (student + admin) is a **UI mockup with hardcoded credentials in client-side JavaScript**. It provides **no real security**:
+The "Log in" dropdown (student + admin) and the `/dashboard` + `/admin` route gates are a **client-side placeholder**, carried over from the original demo. They provide **no real security**:
 
-- Credentials are visible to anyone who views source (`ADMIN_CREDS`, student passwords `student123` / `password`).
-- "Login" just toggles which `<div class="view">` is shown — no session, no server, no access control.
-- The student/admin dashboards render **hardcoded demo data**; the contact form and "add student" only persist to an in-browser storage shim that doesn't exist off-platform.
+- Demo credentials are hardcoded in the client bundle (see [`lib/auth.ts`](lib/auth.ts)).
+- "Sessions" are just a value in `sessionStorage`; the route gates run in the browser, so the pages are directly reachable.
+- Dashboards render hardcoded demo data ([`lib/demo-data.ts`](lib/demo-data.ts)); the contact form and "add student" don't persist.
 
-**Do not treat any of this as real authentication.** Real auth is the next milestone (see below).
+Demo logins (placeholder only):
+- **Student:** `demo@student.com` / `student123`
+- **Admin:** `dominic@munarettotutoring.com` / `admin123`
+
+**Do not treat any of this as real authentication.**
 
 ## Next milestone: Supabase auth
 
-Planned: replace the demo login with **Supabase Auth** for real student and admin logins (email/password, with an admin role). This will introduce real sessions, server-side access control, and persistent data (students, consult requests) in Supabase instead of the current in-memory/demo data.
+[`lib/auth.ts`](lib/auth.ts) is deliberately structured as the single seam where Supabase drops in:
 
-See open decision in the repo notes about whether to migrate off the single HTML file into a framework (e.g. Next.js) as part of that work.
+- `checkCredentials()` → `supabase.auth.signInWithPassword()`
+- `getSession()` / `setSession()` → real Supabase sessions + a `role` claim / `profiles` table
+- the client-side route gates → **Next.js middleware + server-side session checks**
+- demo data → Supabase (Postgres) tables with row-level security
+
+This will need a Supabase project (URL + anon key as env vars; service-role key kept server-side only).
