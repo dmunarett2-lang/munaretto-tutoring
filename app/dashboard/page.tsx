@@ -1,53 +1,41 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
 import Nav from "@/components/Nav";
-import { getSession, clearSession, type DemoUser } from "@/lib/auth";
+import LogoutButton from "@/components/LogoutButton";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Dashboard() {
-  const router = useRouter();
-  const [user, setUser] = useState<DemoUser | null>(null);
-  const [checked, setChecked] = useState(false);
+export const metadata = { title: "Dashboard — Munaretto Tutoring" };
 
-  useEffect(() => {
-    // PLACEHOLDER gate — NOT security. Anyone can reach this route directly;
-    // real protection (middleware + server session check) arrives with Supabase.
-    const session = getSession();
-    if (!session || session.role !== "student") {
-      router.replace("/");
-      return;
-    }
-    setUser(session);
-    setChecked(true);
-  }, [router]);
+export default async function Dashboard() {
+  const supabase = await createClient();
 
-  if (!checked || !user) return null;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const firstName = user.name ? user.name.split(" ")[0] : "there";
+  // Middleware already redirects unauthenticated users; this is defense in depth.
+  if (!user) redirect("/login");
 
-  function logout() {
-    clearSession();
-    router.replace("/");
-  }
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("name, role")
+    .eq("id", user.id)
+    .single();
+
+  // Admins have their own view.
+  if (profile?.role === "admin") redirect("/admin");
+
+  const firstName = profile?.name?.split(" ")[0] || "there";
 
   return (
     <>
       <Nav />
       <div className="wrap app-shell">
-        <div className="demo-banner">
-          <strong>Placeholder dashboard.</strong> This is demo data behind a demo login — not real
-          authentication. Real student accounts and data arrive with Supabase.
-        </div>
-
         <div className="app-header">
           <div>
             <div className="app-eyebrow">Student dashboard</div>
             <div className="app-title">Welcome back, {firstName}</div>
           </div>
-          <button className="logout-btn" onClick={logout}>
-            Log out
-          </button>
+          <LogoutButton />
         </div>
 
         <div className="dash-grid">

@@ -1,17 +1,38 @@
 "use client";
 
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ContactForm() {
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // PLACEHOLDER: no backend yet. Once Supabase lands, this will insert
-    // into an `inquiries` table so it shows up in the admin dashboard.
+    setBusy(true);
+    setError(null);
+
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+
+    const supabase = createClient();
+    const { error: insertError } = await supabase.from("inquiries").insert({
+      name: String(fd.get("name") ?? ""),
+      email: String(fd.get("email") ?? ""),
+      message: String(fd.get("message") ?? ""),
+    });
+
+    if (insertError) {
+      setError("Something went wrong sending your message. Please try again.");
+      setBusy(false);
+      return;
+    }
+
     setSuccess(true);
-    e.currentTarget.reset();
-    setTimeout(() => setSuccess(false), 4000);
+    form.reset();
+    setBusy(false);
+    setTimeout(() => setSuccess(false), 5000);
   }
 
   return (
@@ -19,6 +40,7 @@ export default function ContactForm() {
       <div className={`form-success${success ? " show" : ""}`}>
         Thanks — your message has been sent. I&apos;ll be in touch soon.
       </div>
+      {error && <div className="login-error show" style={{ margin: "0 0 12px" }}>{error}</div>}
       <label>Parent or student name</label>
       <input className="field" name="name" required />
       <label>Email</label>
@@ -29,8 +51,13 @@ export default function ContactForm() {
         required
         placeholder="e.g. ACT prep for a rising junior, or help with the Common App essay..."
       />
-      <button className="submit-btn" type="submit" style={{ width: "auto", padding: "12px 26px" }}>
-        Send message
+      <button
+        className="submit-btn"
+        type="submit"
+        disabled={busy}
+        style={{ width: "auto", padding: "12px 26px" }}
+      >
+        {busy ? "Sending…" : "Send message"}
       </button>
     </form>
   );

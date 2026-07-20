@@ -1,133 +1,90 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
 import Nav from "@/components/Nav";
-import { getSession, clearSession } from "@/lib/auth";
-import { demoStudents, demoInquiries, type Student, type Inquiry } from "@/lib/demo-data";
+import LogoutButton from "@/components/LogoutButton";
+import { createClient } from "@/lib/supabase/server";
+import type { Profile, Inquiry } from "@/lib/types";
 
-export default function Admin() {
-  const router = useRouter();
-  const [checked, setChecked] = useState(false);
-  const [students, setStudents] = useState<Student[]>(demoStudents);
-  const [inquiries] = useState<Inquiry[]>(demoInquiries);
+export const metadata = { title: "Admin — Munaretto Tutoring" };
 
-  const [name, setName] = useState("");
-  const [focus, setFocus] = useState("");
-  const [email, setEmail] = useState("");
+export default async function Admin() {
+  const supabase = await createClient();
 
-  useEffect(() => {
-    // PLACEHOLDER gate — NOT security. Replaced by Supabase middleware + a
-    // server-side admin-role check in the next milestone.
-    const session = getSession();
-    if (!session || session.role !== "admin") {
-      router.replace("/");
-      return;
-    }
-    setChecked(true);
-  }, [router]);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
-  if (!checked) return null;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
 
-  function logout() {
-    clearSession();
-    router.replace("/");
-  }
+  // Admin-only. Non-admins get bounced to their own dashboard.
+  if (profile?.role !== "admin") redirect("/dashboard");
 
-  function addStudent(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    // PLACEHOLDER: local state only. With Supabase this inserts into `students`.
-    setStudents((prev) => [...prev, { name, focus, email, next: "Not scheduled" }]);
-    setName("");
-    setFocus("");
-    setEmail("");
-  }
+  const { data: studentsData } = await supabase
+    .from("profiles")
+    .select("id, name, email, focus, next_session, role, created_at")
+    .eq("role", "student")
+    .order("created_at", { ascending: true });
+
+  const { data: inquiriesData } = await supabase
+    .from("inquiries")
+    .select("id, name, email, message, status, created_at")
+    .order("created_at", { ascending: false });
+
+  const students = (studentsData ?? []) as Profile[];
+  const inquiries = (inquiriesData ?? []) as Inquiry[];
 
   return (
     <>
       <Nav />
       <div className="wrap app-shell">
-        <div className="demo-banner">
-          <strong>Placeholder admin.</strong> Demo login, demo data, changes are in-memory only —
-          not real authentication or storage. Real admin auth (server-side role check) and
-          persistent data arrive with Supabase.
-        </div>
-
         <div className="app-header">
           <div>
             <div className="app-eyebrow">Admin</div>
             <div className="app-title">Dominic&apos;s dashboard</div>
           </div>
-          <button className="logout-btn" onClick={logout}>
-            Log out
-          </button>
+          <LogoutButton />
         </div>
 
         <div className="admin-tables">
           <div className="card">
             <h3>Students</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Focus</th>
-                  <th>Email</th>
-                  <th>Next session</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map((s, i) => (
-                  <tr key={i}>
-                    <td>{s.name}</td>
-                    <td>{s.focus}</td>
-                    <td>{s.email}</td>
-                    <td>{s.next || "—"}</td>
+            {students.length === 0 ? (
+              <div className="empty-state">
+                No students yet — accounts created through the sign-up page will appear here.
+              </div>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Focus</th>
+                    <th>Email</th>
+                    <th>Next session</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <form className="add-student-form" onSubmit={addStudent}>
-              <div>
-                <label className="field-label">Name</label>
-                <input
-                  className="field"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label className="field-label">Focus</label>
-                <input
-                  className="field"
-                  placeholder="e.g. ACT Prep"
-                  value={focus}
-                  onChange={(e) => setFocus(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label className="field-label">Email</label>
-                <input
-                  className="field"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <button type="submit" className="small-btn">
-                Add student
-              </button>
-            </form>
+                </thead>
+                <tbody>
+                  {students.map((s) => (
+                    <tr key={s.id}>
+                      <td>{s.name || "—"}</td>
+                      <td>{s.focus || "—"}</td>
+                      <td>{s.email}</td>
+                      <td>{s.next_session || "Not scheduled"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
 
           <div className="card">
             <h3>Consult requests</h3>
             {inquiries.length === 0 ? (
               <div className="empty-state">
-                No consult requests yet — once Supabase is wired in, home-page contact form
-                submissions will show up here.
+                No consult requests yet — submissions from the home-page contact form show up here.
               </div>
             ) : (
               <table>
@@ -140,8 +97,8 @@ export default function Admin() {
                   </tr>
                 </thead>
                 <tbody>
-                  {inquiries.map((iq, i) => (
-                    <tr key={i}>
+                  {inquiries.map((iq) => (
+                    <tr key={iq.id}>
                       <td>{iq.name}</td>
                       <td>{iq.email}</td>
                       <td style={{ maxWidth: "260px" }}>{iq.message}</td>

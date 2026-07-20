@@ -3,19 +3,48 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { checkCredentials, setSession, DEMO_HINTS, type Role } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/client";
+import LoginForm from "@/components/LoginForm";
+import type { Role } from "@/lib/types";
 
 export default function Nav() {
   const router = useRouter();
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState<Role>("student");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [role, setRole] = useState<Role | null>(null);
 
-  // close the dropdown on any outside click
+  // Track auth state so the nav reflects whether someone is signed in.
+  useEffect(() => {
+    const supabase = createClient();
+
+    async function loadRole(userId: string) {
+      const { data } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .single();
+      setRole((data?.role as Role) ?? "student");
+    }
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setSignedIn(!!user);
+      if (user) loadRole(user.id);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSignedIn(!!session?.user);
+      if (session?.user) loadRole(session.user.id);
+      else setRole(null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Close the login dropdown on outside click.
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) {
@@ -26,19 +55,11 @@ export default function Nav() {
     return () => document.removeEventListener("click", onDocClick);
   }, []);
 
-  function handleLogin() {
-    // PLACEHOLDER auth — replaced by Supabase in the next milestone.
-    const user = checkCredentials(tab, email, password);
-    if (!user) {
-      setError(true);
-      return;
-    }
-    setSession(user);
-    setOpen(false);
-    setEmail("");
-    setPassword("");
-    setError(false);
-    router.push(user.role === "admin" ? "/admin" : "/dashboard");
+  async function logout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
   }
 
   return (
@@ -53,61 +74,28 @@ export default function Nav() {
           <Link href="/#about">About</Link>
           <Link href="/#results">Results</Link>
 
-          <div className="login-wrap" ref={wrapRef}>
-            <button
-              className={`login-btn${open ? " open" : ""}`}
-              onClick={() => setOpen((v) => !v)}
-            >
-              Log in <span className="caret">▾</span>
-            </button>
-            <div className={`login-menu${open ? " show" : ""}`}>
-              <div className="login-tabs">
-                <button
-                  className={`login-tab${tab === "student" ? " active" : ""}`}
-                  onClick={() => {
-                    setTab("student");
-                    setError(false);
-                  }}
-                >
-                  Student
-                </button>
-                <button
-                  className={`login-tab${tab === "admin" ? " active" : ""}`}
-                  onClick={() => {
-                    setTab("admin");
-                    setError(false);
-                  }}
-                >
-                  Admin
-                </button>
-              </div>
-              <div className={`login-error${error ? " show" : ""}`}>
-                Email or password not recognized.
-              </div>
-              <label className="field-label">Email</label>
-              <input
-                className="field"
-                type="email"
-                placeholder="you@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              />
-              <label className="field-label">Password</label>
-              <input
-                className="field"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              />
-              <button className="submit-btn" onClick={handleLogin}>
-                Log in
+          {signedIn ? (
+            <>
+              <Link href={role === "admin" ? "/admin" : "/dashboard"}>
+                {role === "admin" ? "Admin" : "My dashboard"}
+              </Link>
+              <button className="login-btn" onClick={logout}>
+                Log out
               </button>
-              <div className="login-hint">{DEMO_HINTS[tab]}</div>
+            </>
+          ) : (
+            <div className="login-wrap" ref={wrapRef}>
+              <button
+                className={`login-btn${open ? " open" : ""}`}
+                onClick={() => setOpen((v) => !v)}
+              >
+                Log in <span className="caret">▾</span>
+              </button>
+              <div className={`login-menu${open ? " show" : ""}`}>
+                <LoginForm onDone={() => setOpen(false)} />
+              </div>
             </div>
-          </div>
+          )}
 
           <Link href="/#contact" className="nav-cta">
             Book a consult
