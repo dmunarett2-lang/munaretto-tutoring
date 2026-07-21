@@ -240,6 +240,11 @@ footer{border-top:1px solid var(--hairline); padding:36px 0; font-size:0.82rem; 
 .stat-label{color:#AEB4C2; font-size:0.9rem; margin-top:6px;}
 .stat-cta{display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;}
 
+.act-goals{display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:12px;}
+.act-goal{background:var(--paper-2); border:1px solid var(--hairline); border-radius:2px; padding:16px 10px; text-align:center;}
+.act-goal-label{font-size:0.74rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--slate); margin-bottom:6px;}
+.act-goal-num{font-family:var(--font-fraunces), serif; font-size:1.8rem; font-weight:600; line-height:1;}
+
 .dash-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:26px;}
 .card{background:var(--white); border:1px solid var(--hairline); padding:26px; border-radius:2px;}
 .card h3{font-family:var(--font-fraunces), serif; font-size:1.15rem; font-weight:600; margin-bottom:16px;}

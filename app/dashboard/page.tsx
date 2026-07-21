@@ -18,7 +18,9 @@ export default async function Dashboard() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("name, role, sessions_remaining")
+    .select(
+      "name, role, sessions_remaining, act_goal_english, act_goal_math, act_goal_reading, act_goal_science, act_goal_writing",
+    )
     .eq("id", user.id)
     .single();
 
@@ -42,6 +44,15 @@ export default async function Dashboard() {
 
   const firstName = profile?.name?.split(" ")[0] || "there";
   const remaining = profile?.sessions_remaining ?? 0;
+
+  const actGoals = [
+    { label: "English", val: profile?.act_goal_english },
+    { label: "Math", val: profile?.act_goal_math },
+    { label: "Reading", val: profile?.act_goal_reading },
+    { label: "Science", val: profile?.act_goal_science },
+    { label: "Writing", val: profile?.act_goal_writing },
+  ];
+  const hasActGoals = actGoals.some((g) => g.val != null);
 
   return (
     <>
@@ -97,6 +108,20 @@ export default async function Dashboard() {
                 <div className="session-when">{formatPrice(o.amount_cents)} · awaiting payment</div>
               </div>
             ))}
+          </div>
+        )}
+
+        {hasActGoals && (
+          <div className="card" style={{ marginBottom: 26 }}>
+            <h3>ACT goals</h3>
+            <div className="act-goals">
+              {actGoals.map((g) => (
+                <div className="act-goal" key={g.label}>
+                  <div className="act-goal-label">{g.label}</div>
+                  <div className="act-goal-num">{g.val ?? "—"}</div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

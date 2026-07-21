@@ -60,6 +60,82 @@ function ProfileEditor({ student }: { student: Profile }) {
   );
 }
 
+/* ---------- ACT section goals ---------- */
+const ACT_SECTIONS = [
+  { key: "act_goal_english", label: "English" },
+  { key: "act_goal_math", label: "Math" },
+  { key: "act_goal_reading", label: "Reading" },
+  { key: "act_goal_science", label: "Science" },
+  { key: "act_goal_writing", label: "Writing" },
+] as const;
+
+function ActGoalsEditor({ student }: { student: Profile }) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState(false);
+
+  async function save(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    setBusy(true);
+    setSaved(false);
+    setError(false);
+    const num = (k: string) => {
+      const v = String(fd.get(k));
+      return v === "" ? null : parseInt(v);
+    };
+    const supabase = createClient();
+    const { data, error: err } = await supabase
+      .from("profiles")
+      .update({
+        act_goal_english: num("act_goal_english"),
+        act_goal_math: num("act_goal_math"),
+        act_goal_reading: num("act_goal_reading"),
+        act_goal_science: num("act_goal_science"),
+        act_goal_writing: num("act_goal_writing"),
+      })
+      .eq("id", student.id)
+      .select();
+    setBusy(false);
+    if (err || !data || data.length === 0) {
+      setError(true);
+      return;
+    }
+    router.refresh();
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+  }
+
+  return (
+    <form onSubmit={save} className="sm-inline">
+      {saved && <div className="form-success show" style={{ width: "100%" }}>Saved.</div>}
+      {error && (
+        <div className="login-error show" style={{ width: "100%" }}>
+          Save didn&apos;t go through. Make sure the ACT-goals migration has been run.
+        </div>
+      )}
+      {ACT_SECTIONS.map((s) => (
+        <div key={s.key}>
+          <label className="field-label">{s.label} goal</label>
+          <input
+            className="field"
+            name={s.key}
+            type="number"
+            min={1}
+            max={36}
+            defaultValue={(student[s.key] as number | null) ?? ""}
+            placeholder="30"
+          />
+        </div>
+      ))}
+      <div className="pkg-actions">
+        <button type="submit" className="small-btn" disabled={busy}>Save</button>
+      </div>
+    </form>
+  );
+}
+
 /* ---------- generic list row + adder ---------- */
 type Field = { name: string; label: string; type?: string; placeholder?: string };
 
@@ -198,6 +274,14 @@ export default function StudentManager({
       <div className="card" style={{ marginBottom: 26 }}>
         <h3>Profile &amp; session balance</h3>
         <ProfileEditor student={student} />
+      </div>
+
+      <div className="card" style={{ marginBottom: 26 }}>
+        <h3>ACT section goals</h3>
+        <p style={{ color: "var(--slate)", fontSize: "0.88rem", marginBottom: 8 }}>
+          Target scores shown on the student&apos;s dashboard. Leave blank to hide a section.
+        </p>
+        <ActGoalsEditor student={student} />
       </div>
 
       <div className="card" style={{ marginBottom: 26 }}>
