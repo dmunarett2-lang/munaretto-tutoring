@@ -232,6 +232,12 @@ footer{border-top:1px solid var(--hairline); padding:36px 0; font-size:0.82rem; 
 .logout-btn{border:1px solid var(--hairline); background:var(--white); padding:9px 16px; font-size:0.85rem; font-weight:500; border-radius:2px;}
 .logout-btn:hover{border-color:var(--ink);}
 
+.stat-row{display:grid; grid-template-columns:240px 1fr; gap:26px; margin-bottom:26px;}
+.stat-card{background:var(--ink); color:var(--paper); border-radius:2px; padding:26px 28px; display:flex; flex-direction:column; justify-content:center;}
+.stat-num{font-family:var(--font-fraunces), serif; font-size:3rem; font-weight:600; line-height:1;}
+.stat-label{color:#AEB4C2; font-size:0.9rem; margin-top:6px;}
+.stat-cta{display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;}
+
 .dash-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:26px;}
 .card{background:var(--white); border:1px solid var(--hairline); padding:26px; border-radius:2px;}
 .card h3{font-family:var(--font-fraunces), serif; font-size:1.15rem; font-weight:600; margin-bottom:16px;}
@@ -263,6 +269,26 @@ tr:last-child td{border-bottom:none;}
 .small-btn:hover{background:var(--red);}
 .empty-state{color:var(--slate); font-size:0.88rem; padding:20px 0; text-align:center;}
 
+/* admin sub-nav */
+.admin-subnav{display:flex; gap:8px; margin-bottom:26px; flex-wrap:wrap;}
+.admin-subnav-link{padding:8px 14px; font-size:0.88rem; font-weight:600; color:var(--slate); border:1px solid var(--hairline); border-radius:2px; background:var(--white);}
+.admin-subnav-link:hover{border-color:var(--ink); color:var(--ink);}
+.admin-subnav-link.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+
+/* inline editor rows (packages, custom orders, student data) */
+.pkg-row, .sm-inline, .custom-order-form{
+  display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;
+  padding:14px 0; border-bottom:1px solid var(--hairline);
+}
+.pkg-row:last-of-type, .sm-inline:last-of-type, .custom-order-form{border-bottom:none;}
+.pkg-row > div, .sm-inline > div, .custom-order-form > div{flex:1 1 140px; min-width:110px;}
+.pkg-row .field, .sm-inline .field, .custom-order-form .field{margin-bottom:0;}
+.pkg-desc{flex:2 1 200px !important;}
+.pkg-active{display:flex; align-items:center; gap:6px; font-size:0.85rem; color:var(--slate); flex:1 1 100%;}
+.pkg-actions{display:flex; gap:8px; align-items:flex-end; flex:0 0 auto;}
+.pkg-row-new, .sm-add{border-bottom:none; border-top:2px solid var(--hairline); margin-top:6px; padding-top:16px;}
+.pkg-actions .logout-btn{padding:10px 14px;}
+
 /* placeholder-auth banner (removed once Supabase auth lands) */
 .demo-banner{
   background:#FBF3E4; border:1px solid var(--gold); color:#7A5E1E;
@@ -271,7 +297,7 @@ tr:last-child td{border-bottom:none;}
 .demo-banner strong{color:#5E480F;}
 
 @media(max-width:860px){
-  .hero-grid, .about-grid, .contact-grid, .dash-grid{grid-template-columns:1fr;}
+  .hero-grid, .about-grid, .contact-grid, .dash-grid, .stat-row{grid-template-columns:1fr;}
   .services-grid, .results-grid, .test-grid{grid-template-columns:1fr 1fr;}
   .pricing-grid{grid-template-columns:1fr;}
   h1.headline{font-size:2.5rem;}

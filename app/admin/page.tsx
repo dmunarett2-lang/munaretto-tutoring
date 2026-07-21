@@ -1,41 +1,28 @@
-import { redirect } from "next/navigation";
+import Link from "next/link";
 import Nav from "@/components/Nav";
 import LogoutButton from "@/components/LogoutButton";
-import { createClient } from "@/lib/supabase/server";
-import type { Profile, Inquiry } from "@/lib/types";
+import AdminNav from "@/components/AdminNav";
+import { requireAdmin } from "@/lib/supabase/guards";
+import type { Profile, Inquiry, Order } from "@/lib/types";
 
 export const metadata = { title: "Admin — Munaretto Tutoring" };
 
 export default async function Admin() {
-  const supabase = await createClient();
+  const { supabase } = await requireAdmin();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  // Admin-only. Non-admins get bounced to their own dashboard.
-  if (profile?.role !== "admin") redirect("/dashboard");
-
-  const { data: studentsData } = await supabase
-    .from("profiles")
-    .select("id, name, email, focus, next_session, role, created_at")
-    .eq("role", "student")
-    .order("created_at", { ascending: true });
-
-  const { data: inquiriesData } = await supabase
-    .from("inquiries")
-    .select("id, name, email, message, status, created_at")
-    .order("created_at", { ascending: false });
+  const [{ data: studentsData }, { data: inquiriesData }, { data: ordersData }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, name, email, focus, sessions_remaining, role, created_at")
+      .eq("role", "student")
+      .order("created_at", { ascending: true }),
+    supabase.from("inquiries").select("*").order("created_at", { ascending: false }),
+    supabase.from("orders").select("*").eq("status", "pending"),
+  ]);
 
   const students = (studentsData ?? []) as Profile[];
   const inquiries = (inquiriesData ?? []) as Inquiry[];
+  const pendingOrders = (ordersData ?? []) as Order[];
 
   return (
     <>
@@ -48,6 +35,18 @@ export default async function Admin() {
           </div>
           <LogoutButton />
         </div>
+        <AdminNav />
+
+        {pendingOrders.length > 0 && (
+          <div className="demo-banner" style={{ background: "#FBF3E4", borderColor: "var(--gold)" }}>
+            <strong>
+              {pendingOrders.length} order{pendingOrders.length === 1 ? "" : "s"} awaiting payment.
+            </strong>{" "}
+            <Link href="/admin/orders" style={{ color: "var(--red)", fontWeight: 600 }}>
+              Review orders →
+            </Link>
+          </div>
+        )}
 
         <div className="admin-tables">
           <div className="card">
@@ -64,7 +63,8 @@ export default async function Admin() {
                       <th>Name</th>
                       <th>Focus</th>
                       <th>Email</th>
-                      <th>Next session</th>
+                      <th>Sessions left</th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -73,7 +73,15 @@ export default async function Admin() {
                         <td>{s.name || "—"}</td>
                         <td>{s.focus || "—"}</td>
                         <td>{s.email}</td>
-                        <td>{s.next_session || "Not scheduled"}</td>
+                        <td>{s.sessions_remaining}</td>
+                        <td>
+                          <Link
+                            href={`/admin/students/${s.id}`}
+                            style={{ color: "var(--red)", fontWeight: 600, fontSize: "0.85rem" }}
+                          >
+                            Manage →
+                          </Link>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
