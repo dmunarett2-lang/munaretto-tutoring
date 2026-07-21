@@ -27,7 +27,7 @@ export default function Home() {
               <Link href="/#contact" className="btn-primary">
                 Book a free consult
               </Link>
-              <Link href="/#services" className="btn-ghost">
+              <Link href="/booking" className="btn-ghost">
                 See what I offer →
               </Link>
             </div>
