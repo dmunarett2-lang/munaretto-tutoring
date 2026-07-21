@@ -246,6 +246,13 @@ footer{border-top:1px solid var(--hairline); padding:36px 0; font-size:0.82rem; 
 .act-goal-num{font-family:var(--font-fraunces), serif; font-size:1.5rem; font-weight:600; line-height:1;}
 .act-goal-sub{font-size:0.68rem; color:var(--slate); margin-top:5px; text-transform:uppercase; letter-spacing:0.04em;}
 
+.superscore-row{display:flex; gap:18px; align-items:stretch; flex-wrap:wrap;}
+.superscore-badge{background:var(--ink); color:var(--paper); border-radius:2px; padding:20px 30px; display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:150px;}
+.superscore-num{font-family:var(--font-fraunces), serif; font-size:3rem; font-weight:600; line-height:1;}
+.superscore-cap{font-size:0.78rem; color:var(--gold); text-transform:uppercase; letter-spacing:0.06em; margin-top:8px;}
+.superscore-sections{flex:1; min-width:220px;}
+.superscore-note{font-size:0.8rem; color:var(--slate); margin-top:14px;}
+
 .trend{display:inline-block; margin-left:8px; font-size:0.78rem; font-weight:600; white-space:nowrap;}
 .trend.up{color:#3C6B34;}
 .trend.down{color:var(--red);}

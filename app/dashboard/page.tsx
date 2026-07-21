@@ -4,7 +4,7 @@ import Nav from "@/components/Nav";
 import LogoutButton from "@/components/LogoutButton";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/money";
-import { composite, formatTestDate } from "@/lib/act";
+import { composite, superscore, formatTestDate } from "@/lib/act";
 import type {
   Order,
   StudentProgress,
@@ -57,6 +57,14 @@ export default async function Dashboard() {
   const resources = (resourcesData ?? []) as StudentResource[];
   const actTests = (testsData ?? []) as ActTest[];
   const comps = actTests.map((t) => composite(t)); // newest-first, aligned with actTests
+  const sup = superscore(actTests);
+  const superSections = [
+    { label: "English", val: sup.english },
+    { label: "Math", val: sup.math },
+    { label: "Reading", val: sup.reading },
+    { label: "Science", val: sup.science },
+    { label: "Writing", val: sup.writing },
+  ];
 
   const firstName = profile?.name?.split(" ")[0] || "there";
   const remaining = profile?.sessions_remaining ?? 0;
@@ -124,6 +132,30 @@ export default async function Dashboard() {
                 <div className="session-when">{formatPrice(o.amount_cents)} · awaiting payment</div>
               </div>
             ))}
+          </div>
+        )}
+
+        {actTests.length > 0 && (
+          <div className="card" style={{ marginBottom: 26 }}>
+            <h3>ACT superscore</h3>
+            <div className="superscore-row">
+              <div className="superscore-badge">
+                <div className="superscore-num">{sup.composite ?? "—"}</div>
+                <div className="superscore-cap">Superscore</div>
+              </div>
+              <div className="act-goals superscore-sections">
+                {superSections.map((s) => (
+                  <div className="act-goal" key={s.label}>
+                    <div className="act-goal-label">{s.label}</div>
+                    <div className="act-goal-num">{s.val ?? "—"}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <p className="superscore-note">
+              Best score in each section across all tests. Composite = English, Math &amp; Reading
+              (Science not counted).
+            </p>
           </div>
         )}
 
