@@ -95,9 +95,6 @@ export default function Nav() {
           <Link href="/#about" onClick={closeMenus}>
             About
           </Link>
-          <Link href="/#results" onClick={closeMenus}>
-            Results
-          </Link>
 
           {signedIn ? (
             <>

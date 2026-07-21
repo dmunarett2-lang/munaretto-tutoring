@@ -157,42 +157,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="testimonials">
-        <div className="wrap">
-          <div className="section-head">
-            <div className="kicker">From families I&apos;ve worked with</div>
-            <h2 className="section-title">Results, in their words</h2>
-          </div>
-          <div className="test-grid">
-            <div className="test-card">
-              <div className="test-quote">
-                &quot;Our son&apos;s composite jumped six points after two months. More than that, he
-                actually understood why he was missing questions.&quot;
-              </div>
-              <div className="test-name">Parent of a junior</div>
-              <div className="test-meta">ACT Prep</div>
-            </div>
-            <div className="test-card">
-              <div className="test-quote">
-                &quot;Dominic helped me find an essay topic I actually cared about, then made me a
-                much better writer than I was before.&quot;
-              </div>
-              <div className="test-name">High school senior</div>
-              <div className="test-meta">College Essays</div>
-            </div>
-            <div className="test-card">
-              <div className="test-quote">
-                &quot;He kept our whole application timeline organized when we couldn&apos;t. Every
-                deadline was hit, no scrambling.&quot;
-              </div>
-              <div className="test-name">Parent of a senior</div>
-              <div className="test-meta">College Applications</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* CONTACT */}
       <section id="contact">
         <div className="wrap contact-grid">
