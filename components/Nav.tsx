@@ -125,8 +125,8 @@ export default function Nav() {
             </div>
           )}
 
-          <Link href="/#contact" className="nav-cta" onClick={closeMenus}>
-            Book a consult
+          <Link href="/booking" className="nav-cta" onClick={closeMenus}>
+            Book a session
           </Link>
         </div>
       </div>

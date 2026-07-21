@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 export default function ContactForm() {
   const [success, setSuccess] = useState(false);
@@ -16,14 +15,18 @@ export default function ContactForm() {
     const form = e.currentTarget;
     const fd = new FormData(form);
 
-    const supabase = createClient();
-    const { error: insertError } = await supabase.from("inquiries").insert({
-      name: String(fd.get("name") ?? ""),
-      email: String(fd.get("email") ?? ""),
-      message: String(fd.get("message") ?? ""),
+    // Server route saves the inquiry AND emails a notification.
+    const res = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: String(fd.get("name") ?? ""),
+        email: String(fd.get("email") ?? ""),
+        message: String(fd.get("message") ?? ""),
+      }),
     });
 
-    if (insertError) {
+    if (!res.ok) {
       setError("Something went wrong sending your message. Please try again.");
       setBusy(false);
       return;

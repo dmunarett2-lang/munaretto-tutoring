@@ -289,6 +289,8 @@ tr:last-child td{border-bottom:none;}
 .pkg-row-new, .sm-add{border-bottom:none; border-top:2px solid var(--hairline); margin-top:6px; padding-top:16px;}
 .pkg-actions .logout-btn{padding:10px 14px;}
 
+.calendly-embed{width:100%; min-height:720px; border:1px solid var(--hairline); border-radius:2px; background:var(--white);}
+
 /* placeholder-auth banner (removed once Supabase auth lands) */
 .demo-banner{
   background:#FBF3E4; border:1px solid var(--gold); color:#7A5E1E;
