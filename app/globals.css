@@ -246,6 +246,11 @@ footer{border-top:1px solid var(--hairline); padding:36px 0; font-size:0.82rem; 
 .act-goal-num{font-family:var(--font-fraunces), serif; font-size:1.5rem; font-weight:600; line-height:1;}
 .act-goal-sub{font-size:0.68rem; color:var(--slate); margin-top:5px; text-transform:uppercase; letter-spacing:0.04em;}
 
+.trend{display:inline-block; margin-left:8px; font-size:0.78rem; font-weight:600; white-space:nowrap;}
+.trend.up{color:#3C6B34;}
+.trend.down{color:var(--red);}
+.trend.flat{color:var(--slate);}
+
 /* admin ACT scores/goals editor */
 .act-edit-row{display:grid; grid-template-columns:110px 1fr 1fr; gap:12px; align-items:end; padding:8px 0; border-bottom:1px solid var(--hairline);}
 .act-edit-row:last-child{border-bottom:none;}

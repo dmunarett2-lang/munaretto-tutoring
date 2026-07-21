@@ -56,6 +56,7 @@ export default async function Dashboard() {
   const sessions = (sessionsData ?? []) as StudentSession[];
   const resources = (resourcesData ?? []) as StudentResource[];
   const actTests = (testsData ?? []) as ActTest[];
+  const comps = actTests.map((t) => composite(t)); // newest-first, aligned with actTests
 
   const firstName = profile?.name?.split(" ")[0] || "there";
   const remaining = profile?.sessions_remaining ?? 0;
@@ -143,19 +144,37 @@ export default async function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {actTests.map((t) => (
-                    <tr key={t.id}>
-                      <td>{formatTestDate(t.test_date)}</td>
-                      <td>{t.english ?? "—"}</td>
-                      <td>{t.math ?? "—"}</td>
-                      <td>{t.reading ?? "—"}</td>
-                      <td>{t.science ?? "—"}</td>
-                      <td>{t.writing ?? "—"}</td>
-                      <td>
-                        <strong>{composite(t) ?? "—"}</strong>
-                      </td>
-                    </tr>
-                  ))}
+                  {actTests.map((t, i) => {
+                    const comp = comps[i];
+                    let prev: number | null = null;
+                    for (let j = i + 1; j < comps.length; j++) {
+                      if (comps[j] != null) {
+                        prev = comps[j];
+                        break;
+                      }
+                    }
+                    const delta = comp != null && prev != null ? comp - prev : null;
+                    return (
+                      <tr key={t.id}>
+                        <td>{formatTestDate(t.test_date)}</td>
+                        <td>{t.english ?? "—"}</td>
+                        <td>{t.math ?? "—"}</td>
+                        <td>{t.reading ?? "—"}</td>
+                        <td>{t.science ?? "—"}</td>
+                        <td>{t.writing ?? "—"}</td>
+                        <td>
+                          <strong>{comp ?? "—"}</strong>
+                          {delta != null && (
+                            <span
+                              className={`trend ${delta > 0 ? "up" : delta < 0 ? "down" : "flat"}`}
+                            >
+                              {delta > 0 ? `▲ ${delta}` : delta < 0 ? `▼ ${Math.abs(delta)}` : "±0"}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -1,11 +1,14 @@
 import type { ActTest } from "./types";
 
-/** ACT composite = stored value, or the rounded average of the 4 core sections. */
+/**
+ * ACT composite = stored value, or the rounded average of English, Math, and
+ * Reading. Science is tracked but intentionally NOT part of the composite.
+ */
 export function composite(t: ActTest): number | null {
   if (t.composite != null) return t.composite;
-  const core = [t.english, t.math, t.reading, t.science];
+  const core = [t.english, t.math, t.reading];
   if (core.every((x) => x != null)) {
-    return Math.round((core as number[]).reduce((a, b) => a + b, 0) / 4);
+    return Math.round((core as number[]).reduce((a, b) => a + b, 0) / 3);
   }
   return null;
 }

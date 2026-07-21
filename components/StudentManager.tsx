@@ -294,8 +294,9 @@ export default function StudentManager({
       <div className="card" style={{ marginBottom: 26 }}>
         <h3>ACT test history</h3>
         <p style={{ color: "var(--slate)", fontSize: "0.88rem", marginBottom: 8 }}>
-          Add each test with its date and section scores (composite auto-fills from the four core
-          sections if left blank). Most recent shows first on the student&apos;s dashboard.
+          Add each test with its date and section scores. Composite auto-fills from English, Math,
+          and Reading if left blank (Science is tracked but not counted). Most recent shows first on
+          the student&apos;s dashboard.
         </p>
         <ActTestsManager studentId={student.id} tests={actTests} />
       </div>
