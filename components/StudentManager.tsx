@@ -10,22 +10,29 @@ function ProfileEditor({ student }: { student: Profile }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState(false);
 
   async function save(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     setBusy(true);
     setSaved(false);
+    setError(false);
     const supabase = createClient();
-    await supabase
+    const { data, error: updErr } = await supabase
       .from("profiles")
       .update({
         focus: String(fd.get("focus")).trim() || null,
         sessions_remaining: parseInt(String(fd.get("sessions"))) || 0,
       })
-      .eq("id", student.id);
-    router.refresh();
+      .eq("id", student.id)
+      .select();
     setBusy(false);
+    if (updErr || !data || data.length === 0) {
+      setError(true);
+      return;
+    }
+    router.refresh();
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   }
@@ -33,6 +40,11 @@ function ProfileEditor({ student }: { student: Profile }) {
   return (
     <form onSubmit={save} className="sm-inline">
       {saved && <div className="form-success show" style={{ width: "100%" }}>Saved.</div>}
+      {error && (
+        <div className="login-error show" style={{ width: "100%" }}>
+          Save didn&apos;t go through. Make sure the profile-update migration has been run.
+        </div>
+      )}
       <div>
         <label className="field-label">Focus</label>
         <input className="field" name="focus" defaultValue={student.focus ?? ""} placeholder="e.g. ACT Prep" />

@@ -80,6 +80,9 @@ create policy profiles_select_admin on public.profiles for select using (public.
 drop policy if exists profiles_update_own on public.profiles;
 create policy profiles_update_own on public.profiles for update using (auth.uid() = id) with check (auth.uid() = id);
 
+drop policy if exists profiles_update_admin on public.profiles;
+create policy profiles_update_admin on public.profiles for update using (public.is_admin()) with check (public.is_admin());
+
 drop policy if exists inquiries_insert_anyone on public.inquiries;
 create policy inquiries_insert_anyone on public.inquiries for insert with check (true);
 
