@@ -20,7 +20,6 @@ export default function SettingsForm({ settings }: { settings: AppSettings }) {
       .from("app_settings")
       .update({
         zelle_handle: String(fd.get("zelle")).trim() || null,
-        calendly_url: String(fd.get("calendly")).trim() || null,
         notify_email: String(fd.get("notify")).trim() || null,
       })
       .eq("id", 1);
@@ -35,8 +34,6 @@ export default function SettingsForm({ settings }: { settings: AppSettings }) {
       {saved && <div className="form-success show">Saved.</div>}
       <label className="field-label">Zelle handle (email or phone shown to buyers)</label>
       <input className="field" name="zelle" defaultValue={settings.zelle_handle ?? ""} placeholder="you@email.com" />
-      <label className="field-label">Calendly booking link</label>
-      <input className="field" name="calendly" defaultValue={settings.calendly_url ?? ""} placeholder="https://calendly.com/your-name/consult" />
       <label className="field-label">Notification email (where consult requests are sent)</label>
       <input className="field" name="notify" defaultValue={settings.notify_email ?? ""} placeholder="you@email.com" />
       <button type="submit" className="small-btn" disabled={busy}>

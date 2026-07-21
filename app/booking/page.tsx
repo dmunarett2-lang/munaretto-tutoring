@@ -1,28 +1,25 @@
 import Link from "next/link";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import BookingPicker from "@/components/BookingPicker";
 import { createClient } from "@/lib/supabase/server";
+import type { BookingType } from "@/lib/types";
 
 export const metadata = { title: "Book a session — Munaretto Tutoring" };
 
 export default async function Booking() {
   const supabase = await createClient();
-  let calendlyUrl: string | null = null;
+  let types: BookingType[] = [];
   try {
     const { data } = await supabase
-      .from("app_settings")
-      .select("calendly_url")
-      .eq("id", 1)
-      .single();
-    calendlyUrl = data?.calendly_url ?? null;
+      .from("booking_types")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+    types = (data ?? []) as BookingType[];
   } catch {
-    /* settings not set up yet */
+    /* booking_types not set up yet */
   }
-
-  // Calendly embeds cleanly in an iframe; add params to hide extra chrome.
-  const src = calendlyUrl
-    ? `${calendlyUrl}${calendlyUrl.includes("?") ? "&" : "?"}hide_gdpr_banner=1`
-    : null;
 
   return (
     <>
@@ -33,17 +30,12 @@ export default async function Booking() {
           Book a session
         </h1>
         <p className="section-desc" style={{ marginBottom: 28, maxWidth: 560 }}>
-          Pick a time that works for you. Each session is one hour. Free consults are welcome — no
+          Choose what you&apos;d like help with, then pick a time. Free consults are welcome — no
           commitment.
         </p>
 
-        {src ? (
-          <iframe
-            className="calendly-embed"
-            src={src}
-            title="Book a session with Dominic"
-            loading="lazy"
-          />
+        {types.length > 0 ? (
+          <BookingPicker types={types} />
         ) : (
           <div className="pricing-note">
             <strong>Online booking is being set up.</strong> In the meantime,{" "}

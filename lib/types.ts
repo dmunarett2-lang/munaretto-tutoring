@@ -74,6 +74,15 @@ export type StudentSession = {
   sort_order: number;
 };
 
+export type BookingType = {
+  id: string;
+  label: string;
+  description: string | null;
+  calendly_url: string;
+  sort_order: number;
+  is_active: boolean;
+};
+
 export type StudentResource = {
   id: string;
   student_id: string;
