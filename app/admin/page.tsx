@@ -2,6 +2,7 @@ import Link from "next/link";
 import Nav from "@/components/Nav";
 import LogoutButton from "@/components/LogoutButton";
 import AdminNav from "@/components/AdminNav";
+import InquiriesManager from "@/components/InquiriesManager";
 import { requireAdmin } from "@/lib/supabase/guards";
 import type { Profile, Inquiry, Order } from "@/lib/types";
 
@@ -92,36 +93,7 @@ export default async function Admin() {
 
           <div className="card">
             <h3>Consult requests</h3>
-            {inquiries.length === 0 ? (
-              <div className="empty-state">
-                No consult requests yet — submissions from the home-page contact form show up here.
-              </div>
-            ) : (
-              <div className="table-scroll">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      <th>Message</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {inquiries.map((iq) => (
-                      <tr key={iq.id}>
-                        <td>{iq.name}</td>
-                        <td>{iq.email}</td>
-                        <td style={{ maxWidth: "260px" }}>{iq.message}</td>
-                        <td>
-                          <span className="pill new">{iq.status}</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <InquiriesManager inquiries={inquiries} />
           </div>
         </div>
       </div>

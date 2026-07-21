@@ -17,8 +17,18 @@ export default async function Pricing() {
     .order("sort_order", { ascending: true });
 
   const packages = (data ?? []) as Package[];
-  // Highlight the middle package (mirrors the original three-card layout).
-  const highlightIndex = packages.length >= 3 ? 1 : -1;
+
+  // Group by session-type category, preserving sort order.
+  const groups: { category: string; items: Package[] }[] = [];
+  for (const p of packages) {
+    const cat = p.category || "Packages";
+    let g = groups.find((x) => x.category === cat);
+    if (!g) {
+      g = { category: cat, items: [] };
+      groups.push(g);
+    }
+    g.items.push(p);
+  }
 
   return (
     <>
@@ -40,7 +50,7 @@ export default async function Pricing() {
 
       <section>
         <div className="wrap">
-          {packages.length === 0 ? (
+          {groups.length === 0 ? (
             <div className="pricing-note">
               <strong>Packages coming soon.</strong>{" "}
               <Link href="/#contact" style={{ color: "var(--red)", fontWeight: 600 }}>
@@ -49,41 +59,53 @@ export default async function Pricing() {
               and we&apos;ll put together the right plan.
             </div>
           ) : (
-            <div className="pricing-grid">
-              {packages.map((p, i) => {
-                const highlight = i === highlightIndex;
-                const perSession =
-                  p.price_cents > 0 && p.sessions > 1
-                    ? formatPrice(Math.round(p.price_cents / p.sessions))
-                    : null;
-                return (
-                  <div key={p.id} className={`pricing-card${highlight ? " highlight" : ""}`}>
-                    <div className="pricing-tier">{p.name}</div>
-                    <div className="pricing-rate">{formatPrice(p.price_cents)}</div>
-                    <div className="pricing-desc">
-                      {p.description ||
-                        `${p.sessions} ${p.sessions === 1 ? "session" : "sessions"}.`}
-                    </div>
-                    <ul className="pricing-features">
-                      <li className="pricing-feature">
-                        {p.sessions} {p.sessions === 1 ? "one-hour session" : "one-hour sessions"}
-                      </li>
-                      {perSession && (
-                        <li className="pricing-feature">{perSession} per session</li>
-                      )}
-                      <li className="pricing-feature">Paid by Zelle</li>
-                    </ul>
-                    <PurchaseButton
-                      packageId={p.id}
-                      packageName={p.name}
-                      sessions={p.sessions}
-                      amountCents={p.price_cents}
-                      highlight={highlight}
-                    />
+            groups.map((group) => {
+              const highlightIndex = group.items.length >= 3 ? 1 : -1;
+              return (
+                <div key={group.category} className="pricing-group">
+                  <h2 className="section-title" style={{ fontSize: "1.6rem", marginBottom: 18 }}>
+                    {group.category}
+                  </h2>
+                  <div className="pricing-grid">
+                    {group.items.map((p, i) => {
+                      const highlight = i === highlightIndex;
+                      const perSession =
+                        p.price_cents > 0 && p.sessions > 1
+                          ? formatPrice(Math.round(p.price_cents / p.sessions))
+                          : null;
+                      return (
+                        <div key={p.id} className={`pricing-card${highlight ? " highlight" : ""}`}>
+                          <div className="pricing-tier">{p.name}</div>
+                          <div className="pricing-rate">{formatPrice(p.price_cents)}</div>
+                          <div className="pricing-desc">
+                            {p.description ||
+                              `${p.sessions} ${p.sessions === 1 ? "session" : "sessions"}.`}
+                          </div>
+                          <ul className="pricing-features">
+                            <li className="pricing-feature">
+                              {p.sessions}{" "}
+                              {p.sessions === 1 ? "one-hour session" : "one-hour sessions"}
+                            </li>
+                            {perSession && (
+                              <li className="pricing-feature">{perSession} per session</li>
+                            )}
+                            <li className="pricing-feature">Paid by Zelle</li>
+                          </ul>
+                          <PurchaseButton
+                            packageId={p.id}
+                            packageName={p.name}
+                            category={p.category}
+                            sessions={p.sessions}
+                            amountCents={p.price_cents}
+                            highlight={highlight}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })
           )}
 
           <div className="pricing-note">

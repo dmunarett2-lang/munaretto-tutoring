@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 type Props = {
   packageId: string;
   packageName: string;
+  category?: string | null;
   sessions: number;
   amountCents: number;
   highlight?: boolean;
@@ -16,6 +17,7 @@ type Props = {
 export default function PurchaseButton({
   packageId,
   packageName,
+  category,
   sessions,
   amountCents,
   highlight,
@@ -59,7 +61,7 @@ export default function PurchaseButton({
       buyer_name: profile?.name || profile?.email || user.email,
       buyer_email: profile?.email || user.email,
       package_id: packageId,
-      package_name: packageName,
+      package_name: category ? `${category} — ${packageName}` : packageName,
       sessions,
       amount_cents: amountCents,
       payment_method: "zelle",

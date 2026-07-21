@@ -23,6 +23,7 @@ export type Inquiry = {
 export type Package = {
   id: string;
   name: string;
+  category: string | null;
   sessions: number;
   price_cents: number;
   description: string | null;

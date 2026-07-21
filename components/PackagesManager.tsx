@@ -19,6 +19,7 @@ function PackageRow({ pkg }: { pkg: Package }) {
       .from("packages")
       .update({
         name: String(fd.get("name")),
+        category: String(fd.get("category")) || null,
         sessions: parseInt(String(fd.get("sessions"))) || 1,
         price_cents: parseDollarsToCents(String(fd.get("price"))),
         description: String(fd.get("description")) || null,
@@ -43,6 +44,10 @@ function PackageRow({ pkg }: { pkg: Package }) {
       <div>
         <label className="field-label">Name</label>
         <input className="field" name="name" defaultValue={pkg.name} required />
+      </div>
+      <div>
+        <label className="field-label">Category</label>
+        <input className="field" name="category" defaultValue={pkg.category ?? ""} placeholder="e.g. ACT Prep" />
       </div>
       <div>
         <label className="field-label">Sessions</label>
@@ -87,6 +92,7 @@ export default function PackagesManager({ packages }: { packages: Package[] }) {
     const supabase = createClient();
     await supabase.from("packages").insert({
       name: String(fd.get("name")),
+      category: String(fd.get("category")) || null,
       sessions: parseInt(String(fd.get("sessions"))) || 1,
       price_cents: parseDollarsToCents(String(fd.get("price"))),
       description: String(fd.get("description")) || null,
@@ -107,6 +113,10 @@ export default function PackagesManager({ packages }: { packages: Package[] }) {
         <div>
           <label className="field-label">Name</label>
           <input className="field" name="name" placeholder="e.g. 20-Session Package" required />
+        </div>
+        <div>
+          <label className="field-label">Category</label>
+          <input className="field" name="category" placeholder="e.g. ACT Prep" />
         </div>
         <div>
           <label className="field-label">Sessions</label>
