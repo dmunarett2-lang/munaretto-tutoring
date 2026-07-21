@@ -54,7 +54,11 @@ create or replace function public.prevent_role_change()
 returns trigger language plpgsql security definer set search_path = public
 as $$
 begin
-  if new.role is distinct from old.role and not public.is_admin() then
+  -- Only restrict real logged-in users. auth.uid() is null for the SQL editor
+  -- and service role, so admin promotion from the dashboard still works.
+  if new.role is distinct from old.role
+     and auth.uid() is not null
+     and not public.is_admin() then
     new.role := old.role;
   end if;
   return new;
