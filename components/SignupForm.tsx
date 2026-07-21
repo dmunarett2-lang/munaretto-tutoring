@@ -29,7 +29,7 @@ export default function SignupForm() {
         // Copied into the profile row by the handle_new_user trigger.
         data: { name: name.trim() },
         emailRedirectTo:
-          typeof window !== "undefined" ? `${window.location.origin}/dashboard` : undefined,
+          typeof window !== "undefined" ? `${window.location.origin}/auth/confirmed` : undefined,
       },
     });
 
