@@ -87,8 +87,9 @@ export default async function Pricing() {
           )}
 
           <div className="pricing-note">
-            <strong>Need something custom?</strong> Book a free consult and we&apos;ll build a
-            package sized to exactly what you need — any number of sessions.
+            <strong>Need something custom?</strong>{" "}
+            Book a free consult and we&apos;ll build a package sized to exactly what you need — any
+            number of sessions.
           </div>
         </div>
       </section>
