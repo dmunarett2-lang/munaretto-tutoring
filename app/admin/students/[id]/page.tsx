@@ -5,7 +5,13 @@ import LogoutButton from "@/components/LogoutButton";
 import AdminNav from "@/components/AdminNav";
 import StudentManager from "@/components/StudentManager";
 import { requireAdmin } from "@/lib/supabase/guards";
-import type { Profile, StudentProgress, StudentSession, StudentResource } from "@/lib/types";
+import type {
+  Profile,
+  StudentProgress,
+  StudentSession,
+  StudentResource,
+  ActTest,
+} from "@/lib/types";
 
 export const metadata = { title: "Manage student — Admin" };
 
@@ -25,11 +31,16 @@ export default async function ManageStudent({
   if (!studentData) notFound();
   const student = studentData as Profile;
 
-  const [{ data: progressData }, { data: sessionsData }, { data: resourcesData }] =
+  const [{ data: progressData }, { data: sessionsData }, { data: resourcesData }, { data: testsData }] =
     await Promise.all([
       supabase.from("student_progress").select("*").eq("student_id", id).order("sort_order"),
       supabase.from("student_sessions").select("*").eq("student_id", id).order("sort_order"),
       supabase.from("student_resources").select("*").eq("student_id", id).order("sort_order"),
+      supabase
+        .from("act_tests")
+        .select("*")
+        .eq("student_id", id)
+        .order("test_date", { ascending: false }),
     ]);
 
   return (
@@ -59,6 +70,7 @@ export default async function ManageStudent({
           progress={(progressData ?? []) as StudentProgress[]}
           sessions={(sessionsData ?? []) as StudentSession[]}
           resources={(resourcesData ?? []) as StudentResource[]}
+          actTests={(testsData ?? []) as ActTest[]}
         />
       </div>
     </>

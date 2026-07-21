@@ -88,6 +88,19 @@ export type StudentSession = {
   sort_order: number;
 };
 
+export type ActTest = {
+  id: string;
+  student_id: string;
+  test_date: string;
+  english: number | null;
+  math: number | null;
+  reading: number | null;
+  science: number | null;
+  writing: number | null;
+  composite: number | null;
+  created_at: string;
+};
+
 export type BookingType = {
   id: string;
   label: string;

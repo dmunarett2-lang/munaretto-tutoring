@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import type { Profile, StudentProgress, StudentSession, StudentResource } from "@/lib/types";
+import ActTestsManager from "@/components/ActTestsManager";
+import type {
+  Profile,
+  StudentProgress,
+  StudentSession,
+  StudentResource,
+  ActTest,
+} from "@/lib/types";
 
 /* ---------- profile (focus + session balance) ---------- */
 function ProfileEditor({ student }: { student: Profile }) {
@@ -87,7 +94,6 @@ function ActGoalsEditor({ student }: { student: Profile }) {
     };
     const patch: Record<string, unknown> = {};
     for (const s of ACT_SECTIONS) {
-      patch[`act_score_${s.section}`] = num(`act_score_${s.section}`);
       patch[`act_goal_${s.section}`] = num(`act_goal_${s.section}`);
     }
     const supabase = createClient();
@@ -107,45 +113,28 @@ function ActGoalsEditor({ student }: { student: Profile }) {
   }
 
   return (
-    <form onSubmit={save}>
-      {saved && <div className="form-success show">Saved.</div>}
+    <form onSubmit={save} className="sm-inline">
+      {saved && <div className="form-success show" style={{ width: "100%" }}>Saved.</div>}
       {error && (
-        <div className="login-error show">
+        <div className="login-error show" style={{ width: "100%" }}>
           Save didn&apos;t go through. Make sure the latest migration has been run.
         </div>
       )}
-      <div className="act-edit">
-        {ACT_SECTIONS.map((s) => (
-          <div className="act-edit-row" key={s.section}>
-            <div className="act-edit-name">{s.label}</div>
-            <div className="act-edit-field">
-              <label className="field-label">Current score</label>
-              <input
-                className="field"
-                name={`act_score_${s.section}`}
-                type="number"
-                min={1}
-                max={36}
-                defaultValue={(student[`act_score_${s.section}` as keyof Profile] as number | null) ?? ""}
-                placeholder="—"
-              />
-            </div>
-            <div className="act-edit-field">
-              <label className="field-label">Goal</label>
-              <input
-                className="field"
-                name={`act_goal_${s.section}`}
-                type="number"
-                min={1}
-                max={36}
-                defaultValue={(student[`act_goal_${s.section}` as keyof Profile] as number | null) ?? ""}
-                placeholder="30"
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="pkg-actions" style={{ marginTop: 12 }}>
+      {ACT_SECTIONS.map((s) => (
+        <div key={s.section}>
+          <label className="field-label">{s.label} goal</label>
+          <input
+            className="field"
+            name={`act_goal_${s.section}`}
+            type="number"
+            min={1}
+            max={36}
+            defaultValue={(student[`act_goal_${s.section}` as keyof Profile] as number | null) ?? ""}
+            placeholder="30"
+          />
+        </div>
+      ))}
+      <div className="pkg-actions">
         <button type="submit" className="small-btn" disabled={busy}>Save</button>
       </div>
     </form>
@@ -264,11 +253,13 @@ export default function StudentManager({
   progress,
   sessions,
   resources,
+  actTests,
 }: {
   student: Profile;
   progress: StudentProgress[];
   sessions: StudentSession[];
   resources: StudentResource[];
+  actTests: ActTest[];
 }) {
   const progressFields: Field[] = [
     { name: "label", label: "Label", placeholder: "ACT Composite" },
@@ -293,12 +284,20 @@ export default function StudentManager({
       </div>
 
       <div className="card" style={{ marginBottom: 26 }}>
-        <h3>ACT scores &amp; goals</h3>
+        <h3>ACT goals</h3>
         <p style={{ color: "var(--slate)", fontSize: "0.88rem", marginBottom: 8 }}>
-          Enter each section&apos;s current score and target goal. Shown on the student&apos;s
-          dashboard. Leave a section blank to hide it.
+          Target score for each section, shown on the student&apos;s dashboard. Leave blank to hide.
         </p>
         <ActGoalsEditor student={student} />
+      </div>
+
+      <div className="card" style={{ marginBottom: 26 }}>
+        <h3>ACT test history</h3>
+        <p style={{ color: "var(--slate)", fontSize: "0.88rem", marginBottom: 8 }}>
+          Add each test with its date and section scores (composite auto-fills from the four core
+          sections if left blank). Most recent shows first on the student&apos;s dashboard.
+        </p>
+        <ActTestsManager studentId={student.id} tests={actTests} />
       </div>
 
       <div className="card" style={{ marginBottom: 26 }}>

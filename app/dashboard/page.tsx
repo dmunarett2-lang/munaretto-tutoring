@@ -4,7 +4,14 @@ import Nav from "@/components/Nav";
 import LogoutButton from "@/components/LogoutButton";
 import { createClient } from "@/lib/supabase/server";
 import { formatPrice } from "@/lib/money";
-import type { Order, StudentProgress, StudentSession, StudentResource } from "@/lib/types";
+import { composite, formatTestDate } from "@/lib/act";
+import type {
+  Order,
+  StudentProgress,
+  StudentSession,
+  StudentResource,
+  ActTest,
+} from "@/lib/types";
 
 export const metadata = { title: "Dashboard — Munaretto Tutoring" };
 
@@ -19,21 +26,28 @@ export default async function Dashboard() {
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "name, role, sessions_remaining, act_goal_english, act_goal_math, act_goal_reading, act_goal_science, act_goal_writing, act_score_english, act_score_math, act_score_reading, act_score_science, act_score_writing",
+      "name, role, sessions_remaining, act_goal_english, act_goal_math, act_goal_reading, act_goal_science, act_goal_writing",
     )
     .eq("id", user.id)
     .single();
 
   if (profile?.role === "admin") redirect("/admin");
 
-  const [{ data: ordersData }, { data: settingsData }, { data: progressData }, { data: sessionsData }, { data: resourcesData }] =
-    await Promise.all([
-      supabase.from("orders").select("*").eq("student_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("app_settings").select("zelle_handle").eq("id", 1).single(),
-      supabase.from("student_progress").select("*").eq("student_id", user.id).order("sort_order"),
-      supabase.from("student_sessions").select("*").eq("student_id", user.id).order("sort_order"),
-      supabase.from("student_resources").select("*").eq("student_id", user.id).order("sort_order"),
-    ]);
+  const [
+    { data: ordersData },
+    { data: settingsData },
+    { data: progressData },
+    { data: sessionsData },
+    { data: resourcesData },
+    { data: testsData },
+  ] = await Promise.all([
+    supabase.from("orders").select("*").eq("student_id", user.id).order("created_at", { ascending: false }),
+    supabase.from("app_settings").select("zelle_handle").eq("id", 1).single(),
+    supabase.from("student_progress").select("*").eq("student_id", user.id).order("sort_order"),
+    supabase.from("student_sessions").select("*").eq("student_id", user.id).order("sort_order"),
+    supabase.from("student_resources").select("*").eq("student_id", user.id).order("sort_order"),
+    supabase.from("act_tests").select("*").eq("student_id", user.id).order("test_date", { ascending: false }),
+  ]);
 
   const orders = (ordersData ?? []) as Order[];
   const pending = orders.filter((o) => o.status === "pending");
@@ -41,18 +55,19 @@ export default async function Dashboard() {
   const progress = (progressData ?? []) as StudentProgress[];
   const sessions = (sessionsData ?? []) as StudentSession[];
   const resources = (resourcesData ?? []) as StudentResource[];
+  const actTests = (testsData ?? []) as ActTest[];
 
   const firstName = profile?.name?.split(" ")[0] || "there";
   const remaining = profile?.sessions_remaining ?? 0;
 
-  const actSections = [
-    { label: "English", score: profile?.act_score_english, goal: profile?.act_goal_english },
-    { label: "Math", score: profile?.act_score_math, goal: profile?.act_goal_math },
-    { label: "Reading", score: profile?.act_score_reading, goal: profile?.act_goal_reading },
-    { label: "Science", score: profile?.act_score_science, goal: profile?.act_goal_science },
-    { label: "Writing", score: profile?.act_score_writing, goal: profile?.act_goal_writing },
+  const actGoals = [
+    { label: "English", val: profile?.act_goal_english },
+    { label: "Math", val: profile?.act_goal_math },
+    { label: "Reading", val: profile?.act_goal_reading },
+    { label: "Science", val: profile?.act_goal_science },
+    { label: "Writing", val: profile?.act_goal_writing },
   ];
-  const hasActGoals = actSections.some((s) => s.score != null || s.goal != null);
+  const hasActGoals = actGoals.some((g) => g.val != null);
 
   return (
     <>
@@ -111,21 +126,50 @@ export default async function Dashboard() {
           </div>
         )}
 
+        {actTests.length > 0 && (
+          <div className="card" style={{ marginBottom: 26 }}>
+            <h3>ACT test history</h3>
+            <div className="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>English</th>
+                    <th>Math</th>
+                    <th>Reading</th>
+                    <th>Science</th>
+                    <th>Writing</th>
+                    <th>Composite</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {actTests.map((t) => (
+                    <tr key={t.id}>
+                      <td>{formatTestDate(t.test_date)}</td>
+                      <td>{t.english ?? "—"}</td>
+                      <td>{t.math ?? "—"}</td>
+                      <td>{t.reading ?? "—"}</td>
+                      <td>{t.science ?? "—"}</td>
+                      <td>{t.writing ?? "—"}</td>
+                      <td>
+                        <strong>{composite(t) ?? "—"}</strong>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         {hasActGoals && (
           <div className="card" style={{ marginBottom: 26 }}>
-            <h3>ACT scores &amp; goals</h3>
+            <h3>ACT goals</h3>
             <div className="act-goals">
-              {actSections.map((s) => (
-                <div className="act-goal" key={s.label}>
-                  <div className="act-goal-label">{s.label}</div>
-                  <div className="act-goal-num">
-                    {s.goal != null
-                      ? `${s.score ?? "—"} / ${s.goal}`
-                      : s.score != null
-                        ? s.score
-                        : "—"}
-                  </div>
-                  {s.goal != null && <div className="act-goal-sub">score / goal</div>}
+              {actGoals.map((g) => (
+                <div className="act-goal" key={g.label}>
+                  <div className="act-goal-label">{g.label}</div>
+                  <div className="act-goal-num">{g.val ?? "—"}</div>
                 </div>
               ))}
             </div>
