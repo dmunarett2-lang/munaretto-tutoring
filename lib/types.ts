@@ -8,11 +8,17 @@ export type Profile = {
   focus: string | null;
   next_session: string | null;
   sessions_remaining: number;
+  phone: string | null;
   act_goal_english: number | null;
   act_goal_math: number | null;
   act_goal_reading: number | null;
   act_goal_science: number | null;
   act_goal_writing: number | null;
+  act_score_english: number | null;
+  act_score_math: number | null;
+  act_score_reading: number | null;
+  act_score_science: number | null;
+  act_score_writing: number | null;
   created_at: string;
 };
 

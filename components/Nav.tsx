@@ -104,6 +104,9 @@ export default function Nav() {
               >
                 {role === "admin" ? "Admin" : "My dashboard"}
               </Link>
+              <Link href="/account" onClick={closeMenus}>
+                Account
+              </Link>
               <button className="login-btn" onClick={logout}>
                 Log out
               </button>

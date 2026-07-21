@@ -243,7 +243,18 @@ footer{border-top:1px solid var(--hairline); padding:36px 0; font-size:0.82rem; 
 .act-goals{display:grid; grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:12px;}
 .act-goal{background:var(--paper-2); border:1px solid var(--hairline); border-radius:2px; padding:16px 10px; text-align:center;}
 .act-goal-label{font-size:0.74rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--slate); margin-bottom:6px;}
-.act-goal-num{font-family:var(--font-fraunces), serif; font-size:1.8rem; font-weight:600; line-height:1;}
+.act-goal-num{font-family:var(--font-fraunces), serif; font-size:1.5rem; font-weight:600; line-height:1;}
+.act-goal-sub{font-size:0.68rem; color:var(--slate); margin-top:5px; text-transform:uppercase; letter-spacing:0.04em;}
+
+/* admin ACT scores/goals editor */
+.act-edit-row{display:grid; grid-template-columns:110px 1fr 1fr; gap:12px; align-items:end; padding:8px 0; border-bottom:1px solid var(--hairline);}
+.act-edit-row:last-child{border-bottom:none;}
+.act-edit-name{font-weight:600; font-size:0.92rem; padding-bottom:9px;}
+.act-edit-field .field{margin-bottom:0;}
+@media(max-width:560px){
+  .act-edit-row{grid-template-columns:1fr 1fr;}
+  .act-edit-name{grid-column:1/-1; padding-bottom:0;}
+}
 
 .dash-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:26px;}
 .card{background:var(--white); border:1px solid var(--hairline); padding:26px; border-radius:2px;}

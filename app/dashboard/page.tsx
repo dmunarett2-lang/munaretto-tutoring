@@ -19,7 +19,7 @@ export default async function Dashboard() {
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "name, role, sessions_remaining, act_goal_english, act_goal_math, act_goal_reading, act_goal_science, act_goal_writing",
+      "name, role, sessions_remaining, act_goal_english, act_goal_math, act_goal_reading, act_goal_science, act_goal_writing, act_score_english, act_score_math, act_score_reading, act_score_science, act_score_writing",
     )
     .eq("id", user.id)
     .single();
@@ -45,14 +45,14 @@ export default async function Dashboard() {
   const firstName = profile?.name?.split(" ")[0] || "there";
   const remaining = profile?.sessions_remaining ?? 0;
 
-  const actGoals = [
-    { label: "English", val: profile?.act_goal_english },
-    { label: "Math", val: profile?.act_goal_math },
-    { label: "Reading", val: profile?.act_goal_reading },
-    { label: "Science", val: profile?.act_goal_science },
-    { label: "Writing", val: profile?.act_goal_writing },
+  const actSections = [
+    { label: "English", score: profile?.act_score_english, goal: profile?.act_goal_english },
+    { label: "Math", score: profile?.act_score_math, goal: profile?.act_goal_math },
+    { label: "Reading", score: profile?.act_score_reading, goal: profile?.act_goal_reading },
+    { label: "Science", score: profile?.act_score_science, goal: profile?.act_goal_science },
+    { label: "Writing", score: profile?.act_score_writing, goal: profile?.act_goal_writing },
   ];
-  const hasActGoals = actGoals.some((g) => g.val != null);
+  const hasActGoals = actSections.some((s) => s.score != null || s.goal != null);
 
   return (
     <>
@@ -113,12 +113,19 @@ export default async function Dashboard() {
 
         {hasActGoals && (
           <div className="card" style={{ marginBottom: 26 }}>
-            <h3>ACT goals</h3>
+            <h3>ACT scores &amp; goals</h3>
             <div className="act-goals">
-              {actGoals.map((g) => (
-                <div className="act-goal" key={g.label}>
-                  <div className="act-goal-label">{g.label}</div>
-                  <div className="act-goal-num">{g.val ?? "—"}</div>
+              {actSections.map((s) => (
+                <div className="act-goal" key={s.label}>
+                  <div className="act-goal-label">{s.label}</div>
+                  <div className="act-goal-num">
+                    {s.goal != null
+                      ? `${s.score ?? "—"} / ${s.goal}`
+                      : s.score != null
+                        ? s.score
+                        : "—"}
+                  </div>
+                  {s.goal != null && <div className="act-goal-sub">score / goal</div>}
                 </div>
               ))}
             </div>

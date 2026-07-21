@@ -60,13 +60,13 @@ function ProfileEditor({ student }: { student: Profile }) {
   );
 }
 
-/* ---------- ACT section goals ---------- */
+/* ---------- ACT section scores + goals ---------- */
 const ACT_SECTIONS = [
-  { key: "act_goal_english", label: "English" },
-  { key: "act_goal_math", label: "Math" },
-  { key: "act_goal_reading", label: "Reading" },
-  { key: "act_goal_science", label: "Science" },
-  { key: "act_goal_writing", label: "Writing" },
+  { section: "english", label: "English" },
+  { section: "math", label: "Math" },
+  { section: "reading", label: "Reading" },
+  { section: "science", label: "Science" },
+  { section: "writing", label: "Writing" },
 ] as const;
 
 function ActGoalsEditor({ student }: { student: Profile }) {
@@ -85,16 +85,15 @@ function ActGoalsEditor({ student }: { student: Profile }) {
       const v = String(fd.get(k));
       return v === "" ? null : parseInt(v);
     };
+    const patch: Record<string, unknown> = {};
+    for (const s of ACT_SECTIONS) {
+      patch[`act_score_${s.section}`] = num(`act_score_${s.section}`);
+      patch[`act_goal_${s.section}`] = num(`act_goal_${s.section}`);
+    }
     const supabase = createClient();
     const { data, error: err } = await supabase
       .from("profiles")
-      .update({
-        act_goal_english: num("act_goal_english"),
-        act_goal_math: num("act_goal_math"),
-        act_goal_reading: num("act_goal_reading"),
-        act_goal_science: num("act_goal_science"),
-        act_goal_writing: num("act_goal_writing"),
-      })
+      .update(patch)
       .eq("id", student.id)
       .select();
     setBusy(false);
@@ -108,28 +107,45 @@ function ActGoalsEditor({ student }: { student: Profile }) {
   }
 
   return (
-    <form onSubmit={save} className="sm-inline">
-      {saved && <div className="form-success show" style={{ width: "100%" }}>Saved.</div>}
+    <form onSubmit={save}>
+      {saved && <div className="form-success show">Saved.</div>}
       {error && (
-        <div className="login-error show" style={{ width: "100%" }}>
-          Save didn&apos;t go through. Make sure the ACT-goals migration has been run.
+        <div className="login-error show">
+          Save didn&apos;t go through. Make sure the latest migration has been run.
         </div>
       )}
-      {ACT_SECTIONS.map((s) => (
-        <div key={s.key}>
-          <label className="field-label">{s.label} goal</label>
-          <input
-            className="field"
-            name={s.key}
-            type="number"
-            min={1}
-            max={36}
-            defaultValue={(student[s.key] as number | null) ?? ""}
-            placeholder="30"
-          />
-        </div>
-      ))}
-      <div className="pkg-actions">
+      <div className="act-edit">
+        {ACT_SECTIONS.map((s) => (
+          <div className="act-edit-row" key={s.section}>
+            <div className="act-edit-name">{s.label}</div>
+            <div className="act-edit-field">
+              <label className="field-label">Current score</label>
+              <input
+                className="field"
+                name={`act_score_${s.section}`}
+                type="number"
+                min={1}
+                max={36}
+                defaultValue={(student[`act_score_${s.section}` as keyof Profile] as number | null) ?? ""}
+                placeholder="—"
+              />
+            </div>
+            <div className="act-edit-field">
+              <label className="field-label">Goal</label>
+              <input
+                className="field"
+                name={`act_goal_${s.section}`}
+                type="number"
+                min={1}
+                max={36}
+                defaultValue={(student[`act_goal_${s.section}` as keyof Profile] as number | null) ?? ""}
+                placeholder="30"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="pkg-actions" style={{ marginTop: 12 }}>
         <button type="submit" className="small-btn" disabled={busy}>Save</button>
       </div>
     </form>
@@ -277,9 +293,10 @@ export default function StudentManager({
       </div>
 
       <div className="card" style={{ marginBottom: 26 }}>
-        <h3>ACT section goals</h3>
+        <h3>ACT scores &amp; goals</h3>
         <p style={{ color: "var(--slate)", fontSize: "0.88rem", marginBottom: 8 }}>
-          Target scores shown on the student&apos;s dashboard. Leave blank to hide a section.
+          Enter each section&apos;s current score and target goal. Shown on the student&apos;s
+          dashboard. Leave a section blank to hide it.
         </p>
         <ActGoalsEditor student={student} />
       </div>
