@@ -63,6 +63,8 @@ export type StudentProgress = {
   label: string;
   detail: string | null;
   percent: number;
+  current_score: number | null;
+  goal_score: number | null;
   sort_order: number;
 };
 

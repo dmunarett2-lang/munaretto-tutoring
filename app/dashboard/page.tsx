@@ -125,17 +125,32 @@ export default async function Dashboard() {
             {progress.length === 0 ? (
               <div className="empty-state">Progress updates will show up here.</div>
             ) : (
-              progress.map((p) => (
-                <div className="progress-item" key={p.id}>
-                  <div className="progress-top">
-                    <span>{p.label}</span>
-                    {p.detail && <span>{p.detail}</span>}
+              progress.map((p) => {
+                const goal = p.goal_score;
+                let detail: string | null;
+                let pct: number;
+                if (goal != null && goal > 0) {
+                  detail = `${p.current_score ?? "—"} / ${goal}`;
+                  pct =
+                    p.current_score != null
+                      ? Math.min(100, Math.round((p.current_score / goal) * 100))
+                      : 0;
+                } else {
+                  detail = p.detail;
+                  pct = p.percent;
+                }
+                return (
+                  <div className="progress-item" key={p.id}>
+                    <div className="progress-top">
+                      <span>{p.label}</span>
+                      {detail && <span>{detail}</span>}
+                    </div>
+                    <div className="bar">
+                      <div className="bar-fill" style={{ width: `${pct}%` }}></div>
+                    </div>
                   </div>
-                  <div className="bar">
-                    <div className="bar-fill" style={{ width: `${p.percent}%` }}></div>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 

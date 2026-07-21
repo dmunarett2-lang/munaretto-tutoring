@@ -71,7 +71,7 @@ function ListRow({
     const patch: Record<string, unknown> = {};
     for (const f of fields) {
       const v = String(fd.get(f.name));
-      patch[f.name] = f.type === "number" ? parseInt(v) || 0 : v || null;
+      patch[f.name] = f.type === "number" ? (v === "" ? null : parseInt(v)) : v || null;
     }
     setBusy(true);
     const supabase = createClient();
@@ -129,7 +129,7 @@ function ListAdder({
     const row: Record<string, unknown> = { student_id: studentId };
     for (const f of fields) {
       const v = String(fd.get(f.name));
-      row[f.name] = f.type === "number" ? parseInt(v) || 0 : v || null;
+      row[f.name] = f.type === "number" ? (v === "" ? null : parseInt(v)) : v || null;
     }
     setBusy(true);
     const supabase = createClient();
@@ -168,8 +168,8 @@ export default function StudentManager({
 }) {
   const progressFields: Field[] = [
     { name: "label", label: "Label", placeholder: "ACT Composite" },
-    { name: "detail", label: "Detail", placeholder: "27 → 31" },
-    { name: "percent", label: "Percent", type: "number", placeholder: "78" },
+    { name: "current_score", label: "Current score", type: "number", placeholder: "27" },
+    { name: "goal_score", label: "Goal score", type: "number", placeholder: "36" },
   ];
   const sessionFields: Field[] = [
     { name: "title", label: "Title", placeholder: "ACT Reading review" },
@@ -210,7 +210,11 @@ export default function StudentManager({
             table="student_progress"
             id={p.id}
             fields={progressFields}
-            values={{ label: p.label, detail: p.detail ?? "", percent: p.percent }}
+            values={{
+              label: p.label,
+              current_score: p.current_score ?? "",
+              goal_score: p.goal_score ?? "",
+            }}
           />
         ))}
         <ListAdder table="student_progress" studentId={student.id} fields={progressFields} />
